@@ -1,0 +1,64 @@
+#include <GPRS_Shield_Arduino.h>
+#include <SoftwareSerial.h>
+#include <Wire.h>
+#include <Suli.h>
+#include <DHT.h>
+
+#define PIN_TX    7
+#define PIN_RX    8
+#define baudrate  9600
+#define phoneNumber "+12*****1404"
+char message[0];
+GPRS gprsTest(PIN_TX,PIN_RX,baudrate);//RX,TX,baudrate
+
+#define dhtPin 2 
+#define dhtType DHT22   // DHT 22  (AM2302)
+DHT dht(dhtPin, dhtType);
+
+
+
+void setup() {
+  Serial.begin(9600);
+  gprsTest.init();
+  dht.begin();
+  Serial.println("gprs init success");
+  Serial.println("start to send message ...");
+
+}
+
+void loop() {
+  // Wait a few seconds between measurements.
+  delay(2000);
+
+  float h = dht.readHumidity();
+  // Read temperature as Celsius
+  float t = dht.readTemperature();
+  // Read temperature as Fahrenheit
+  float f = dht.readTemperature(true);
+  
+  // Check if any reads failed and exit early (to try again).
+  if (isnan(h) || isnan(t) || isnan(f)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+  
+
+  // Compute heat index
+  // Must send in temp in Fahrenheit!
+  float hi = dht.computeHeatIndex(f, h);
+
+ 
+
+  Serial.print("Humidity: "); 
+  Serial.print(h);
+  Serial.print(" %\t");
+  Serial.print("Temperature: "); 
+  Serial.print(t);
+  Serial.print(" *C ");
+  Serial.print(f);
+  Serial.print(" *F\t");
+  Serial.print("Heat index: ");
+  Serial.print(hi);
+  Serial.println(" *F");
+  gprsTest.sendSMS(phoneNumber,hu);
+}
