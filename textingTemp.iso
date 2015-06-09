@@ -7,8 +7,8 @@
 #define PIN_TX    7
 #define PIN_RX    8
 #define baudrate  9600
-#define phoneNumber "+12*****1404"
-char message[0];
+#define phoneNumber "+12******404"
+char message[140];
 GPRS gprsTest(PIN_TX,PIN_RX,baudrate);//RX,TX,baudrate
 
 #define dhtPin 2 
@@ -20,10 +20,8 @@ DHT dht(dhtPin, dhtType);
 void setup() {
   Serial.begin(9600);
   gprsTest.init();
+  Serial.println(gprsTest.init());
   dht.begin();
-  Serial.println("gprs init success");
-  Serial.println("start to send message ...");
-
 }
 
 void loop() {
@@ -40,15 +38,15 @@ void loop() {
   if (isnan(h) || isnan(t) || isnan(f)) {
     Serial.println("Failed to read from DHT sensor!");
     return;
-  }
-  
-
+  }  
   // Compute heat index
   // Must send in temp in Fahrenheit!
   float hi = dht.computeHeatIndex(f, h);
-
- 
-
+  
+  String message = "The temp is: " + String(f);
+  char charMessage[17];
+  message.toCharArray(charMessage, message.length() +1);
+  
   Serial.print("Humidity: "); 
   Serial.print(h);
   Serial.print(" %\t");
@@ -60,5 +58,7 @@ void loop() {
   Serial.print("Heat index: ");
   Serial.print(hi);
   Serial.println(" *F");
-  gprsTest.sendSMS(phoneNumber,hu);
+  gprsTest.sendSMS(phoneNumber,charMessage);
+  
+  delay(300000);
 }
